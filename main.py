@@ -14,7 +14,32 @@ lower_upper_both = "both"
 length = 16
 
 def generate_password():
-    pass
+    global punctuation
+    global characters_to_exclude
+    global lower_upper_both
+    global length
+    list_of_characters = []
+
+    if punctuation == True:
+        list_of_characters.extend(s.punctuation)
+    if lower_upper_both == "lower":
+        list_of_characters.extend(s.ascii_lowercase)
+    elif lower_upper_both == "upper":
+        list_of_characters.extend(s.ascii_uppercase)
+    elif lower_upper_both == "both":
+        list_of_characters.extend(s.ascii_lowercase)
+        list_of_characters.extend(s.ascii_uppercase)
+    for index in range(0, len(characters_to_exclude)):
+        list_of_characters.remove(characters_to_exclude[index])
+    
+    r.shuffle(list_of_characters)
+    r.shuffle(list_of_characters)
+    generated_password = ""
+    while len(generated_password) < length:
+        generated_password += r.choice(list_of_characters)
+    return generated_password
+
+
 
 def save_password(password, username, website):
     pass
@@ -39,7 +64,6 @@ def remove_all_passwords():
 
 
 def main():
-    global characters
     global punctuation
     global characters_to_exclude
     global lower_upper_both
@@ -60,7 +84,7 @@ def main():
 
         if choice == "1":  # Set the length of the password
             input_length = input("Please type your preferred length of characters: ")
-            length = input_length
+            length = int(input_length)
 
         elif choice == "2":  # Change to just lowercase/uppercase or both
             while True:
