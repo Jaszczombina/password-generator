@@ -1,5 +1,6 @@
 import random as r
 import string as s
+import json
 
 characters = list(
     s.ascii_lowercase +
@@ -40,27 +41,71 @@ def generate_password():
     return generated_password
 
 
+def save_data(filepath, pass_data):
+    data = {
+        'pass_data': pass_data
+    }
+    with open(filepath, 'w') as file:
+        json.dump(data, file, indent=4)
+    
+def load_password_data(filepath):
+    try:
+        with open(filepath, 'r') as file:
+            data = json.load(file)
+            return data['pass_data']
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+    
 
-def save_password(password, username, website):
-    pass
+def save_password(pass_data, website, username, password):
+    pass_data.append({"website": website, "username": username, "password": password})
+    print(f"Added password and username '{username}' for website/app '{website}'")
 
-def show_passwords():
-    pass
+def show_passwords(pass_data):
+    if pass_data == []:
+        print("You have 0 passwords saved")
+        return
+    print("Passwords saved: \n")
+    for p in pass_data:
+        print(f"Website/app: {p['website']}, Username: {p['username']}, Password: {p['password']}")
+    
 
-def remove_password(username, website):
-    pass
+def remove_password(pass_data, website, username):
+    for i, password in enumerate(pass_data):
+        if password['website'] == website and password['username'] == username:
+            removed_pass = pass_data.pop(i)
+            print(f"Removed password for website/app '{website}' and username '{username}'")
+            return
+    else:
+        print(f"\nWebsite and/or username not found, please check the list of passwords")
 
-def change_password(username, website, new_password):
-    pass
+def change_password(pass_data, website, username, new_password):
+    for i, password in enumerate(pass_data):
+        if password['website'] == website and password['username'] == username:
+            password['password'] = new_password
+            return
+        else:
+            print(f"\nWebsite and/or username not found, please check the list of passwords")
 
-def change_website(username, website, new_website):
-    pass
+def change_website(pass_data, website, username, new_website):
+    for i, password in enumerate(pass_data):
+        if password['website'] == website and password['username'] == username:
+            password['website'] = new_website
+            return
+        else:
+            print(f"\nWebsite and/or username not found, please check the list of passwords")
 
-def change_username(username, website, new_username):
-    pass
+def change_username(pass_data, website, username, new_username):
+    for i, password in enumerate(pass_data):
+        if password['website'] == website and password['username'] == username:
+            password['username'] = new_username
+            return
+        else:
+            print(f"\nWebsite and/or username not found, please check the list of passwords")
 
-def remove_all_passwords():
-    pass
+def remove_all_passwords(pass_data):
+    pass_data.clear()
+    print("\nYour password list has been cleared")
 
 
 def main():
@@ -70,17 +115,19 @@ def main():
     global length
 
     print("Welcome to my password generator!")
-    print("Choose which setting you would like to change or simply generate the password!")
+    print("\nChoose which setting you would like to change or simply generate the password!") 
+    filepath = 'password_data.json'                         # might need to revisit this one
+    pass_data = load_password_data(filepath)           # pass_data contains website, username and password values
 
     while True:
-        print(f"1. Set the length of my password (current: {length} characters)")
+        print(f"\n1. Set the length of my password (current: {length} characters)")
         print(f"2. Set the characters to be just lowercase/uppercase/both (current: {lower_upper_both})")
         print(f"3. Set characters to exclude and special characters toggle (current: {characters_to_exclude} and special characters: {punctuation})")
         print("4. Generate my password!")
-        print("5. List and/or modify my passwords")
-        print("6. Remove all passwords")
+        print("5. List my passwords")
+        print("6. Modify my passwords")
         print("7. Exit the generator")
-        choice = input("Please select your option: ")
+        choice = input("\nPlease select your option: ")
 
         if choice == "1":  # Set the length of the password
             input_length = input("Please type your preferred length of characters: ")
@@ -88,12 +135,12 @@ def main():
 
         elif choice == "2":  # Change to just lowercase/uppercase or both
             while True:
-                print("Which setting you'd like to continue with?")
-                print("1. Just lowercase characters")
+                print("\nWhich setting you'd like to continue with?")
+                print("\n1. Just lowercase characters")
                 print("2. JUST UPPERCASE CHARACTERS")
                 print("3. Both lowercase and UPPERCASE characters")
                 print("4. Go back to main menu")
-                input_size = input("Please select your option: ")
+                input_size = input("\nPlease select your option: ")
                 if input_size == "1":   # Set to use lower case only
                     lower_upper_both = "lower"
                     break
@@ -110,11 +157,11 @@ def main():
                     
         elif choice == "3":   # Toggle special characters and exclude characters
             while True:
-                print("What would you like to change about characters?")
-                print(f"1. Toggle special characters on/off (current {punctuation})")
+                print("\nWhat would you like to change about characters?")
+                print(f"\n1. Toggle special characters on/off (current {punctuation})")
                 print(f"2. Add/Remove excluded character(s) (current: {characters_to_exclude})")
                 print("3. Go back to main menu")
-                punc_choice = input("Please select your option: ")
+                punc_choice = input("\nPlease select your option: ")
 
                 if punc_choice == "1":    # Toggle special characters
                     if punctuation:
@@ -124,11 +171,11 @@ def main():
 
                 elif punc_choice == "2":     # Add/Remove characters to exclude
                     while True:
-                        print(f"Current characters being excluded: {characters_to_exclude}")
-                        print("1. Add characters to exclusion")
+                        print(f"\nCurrent characters being excluded: {characters_to_exclude}")
+                        print("\n1. Add characters to exclusion")
                         print("2. Remove characters from exclusion")
                         print("3. Go back")
-                        excl_choice = input("Please select your option: ")
+                        excl_choice = input("\nPlease select your option: ")
 
                         if excl_choice == "1":    # Add characters to exclude
                             print(f"Current characters being excluded: {characters_to_exclude}")
@@ -157,18 +204,19 @@ def main():
 
         elif choice == "4":  # Generate a password
             password = generate_password()   
-            print(f"This is your generated password: {password}")
+            print(f"\nThis is your generated password: {password}")
             while True:
-                print("What do you want to do?")
-                print("1. Save password")
+                print("\nWhat do you want to do?")
+                print("\n1. Save password")
                 print("2. Generate a new password")
                 print("3. Go back")
-                save_choice = input("Please select your option: ")
+                save_choice = input("\nPlease select your option: ")
 
                 if save_choice == "1":     # Save password
-                    username = input("What is the username/email you use this password with: ")
                     website = input("What is the website/app this password will be used for: ")
-                    save_password(password, username, website)
+                    username = input("What is the username/email you use this password with: ")
+                    save_password(pass_data, website, username, password)
+                    break
 
                 elif save_choice == "2":     # Generate new password
                     password = generate_password()
@@ -179,55 +227,60 @@ def main():
                 else:    # Non-existing choice
                     print("You haven't chosen one of the following options")
             
-        
-        elif choice == "5":   # List and modify passwords
-            print("These are your passwords: ")
-            show_passwords()
+        elif choice == "5":
+            print("\nThese are your passwords: ")
+            show_passwords(pass_data)
+
+        elif choice == "6":   # List and modify passwords
             while True:
-                print("What do you want to do?")                  # Maybe an option to go from here to generate passwords
+                print("\nWhat do you want to do?")                  # Maybe an option to go from here to generate passwords
                 print("1. Remove a password")
                 print("2. Change one of the passwords")
                 print("3. Change one of the usernames")
                 print("4. Change one of the websites/apps")
-                print("5. Go back to main menu")
-                list_choice = input("Please select your option: ")
+                print("5. Remove ALL passwords")
+                print("6. Go back to main menu")
+                list_choice = input("\nPlease select your option: ")
                 if list_choice == "1":    # Remove a specific password
-                    rem_username = input("What is the username associated with the password: ")
                     rem_website = input("What is the website/app associated with the password: ")
-                    remove_password(rem_username, rem_website)
+                    rem_username = input("What is the username associated with the password: ")
+                    remove_password(pass_data, rem_website, rem_username)
 
                 elif list_choice == "2":    # Change a specific password
-                    change_pass_username = input("What is the username associated with the password: ")
                     change_pass_website = input("What is the website/app associated with the password: ")
+                    change_pass_username = input("What is the username associated with the password: ")
                     change_pass_new = input("What is the new password: ")
-                    change_password(change_pass_username, change_pass_website, change_pass_new)
+                    change_password(change_pass_website, change_pass_username, change_pass_new)
 
                 elif list_choice == "3":    # Change a specific username
-                    change_user_username = input("What is the username associated with the password: ")
                     change_user_website = input("What is the website/app associated with the password: ")
+                    change_user_username = input("What is the username associated with the password: ")
                     change_user_new = input("What is the new username: ")
-                    change_username(change_user_username, change_user_website, change_user_new)
+                    change_username(change_user_website, change_user_username, change_user_new)
                     
                 elif list_choice == "4":    # Change a specific website/app
-                    change_web_username = input("What is the username associated with the password: ")
                     change_web_website = input("What is the website/app associated with the password: ")
+                    change_web_username = input("What is the username associated with the password: ")
                     change_web_new = input("What is the new website/app: ")
-                    change_website(change_web_username, change_web_website, change_web_new)
+                    change_website(change_web_website, change_web_username, change_web_new)
+                
+                elif list_choice == "5":
+                    print("Be aware, this option is irreversible, do you wish to continue?")
+                    rem_all_choice = input("\nPlease type yes or no: ")
 
-                elif list_choice == "5":     # Go back to main menu
+                    if rem_all_choice.lower() == "yes":
+                        remove_all_passwords(pass_data)
+                    else:
+                        continue
+
+                elif list_choice == "6":     # Go back to main menu
                     break
                 else:    # Non-existing choice
                     print("You haven't chosen one of the following options")
              
-        elif choice == "6":     # Remove all passwords
-            print("Be aware, this option is irreversible, do you wish to continue?")
-            rem_all_choice = input("Please type yes or no: ")
-
-            if rem_all_choice.lower() == "yes":
-                remove_all_passwords()
-            else:
-                continue
         elif choice == "7":  # Exit the generator
+            save_data(filepath, pass_data)
+            print("\nExiting the generator")
             break
         else:   # Non-existing choice
             print("You haven't chosen one of the following options")
