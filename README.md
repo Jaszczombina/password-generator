@@ -1,7 +1,9 @@
 # Simple Password Generator
-Simple function that generates a robust password and saves it in a json file with an email/username and website with it.
+Simple function that generates a robust password and saves it in a json file with an email/username and website/app with it.
 
-You can control what the password should or should not contain and length.
+You can control what the password length and what it should or should not contain.
+There are options to modify the list of passwords (remove, change values, clear it)
+The search for values to change is case sensitive.
 
 ## How to use it
 

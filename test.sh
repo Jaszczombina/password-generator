@@ -1,0 +1,1 @@
+python3 -m pytest source/test_main.py

@@ -77,7 +77,7 @@ def remove_password(pass_data, website, username):
             print(f"Removed password for website/app '{website}' and username '{username}'")
             return
     else:
-        print(f"\nWebsite and/or username not found, please check the list of passwords")
+        print("\nWebsite and/or username not found, please check the list of passwords")
 
 def change_password(pass_data, website, username, new_password):
     for i, password in enumerate(pass_data):
@@ -231,9 +231,12 @@ def main():
             print("\nThese are your passwords: ")
             show_passwords(pass_data)
 
-        elif choice == "6":   # List and modify passwords
+        elif choice == "6":   # Modify passwords
+            if pass_data == []:
+                print("Password list is empty, going back to main menu")
+                continue
             while True:
-                print("\nWhat do you want to do?")                  # Maybe an option to go from here to generate passwords
+                print("\nWhat do you want to do?")               
                 print("1. Remove a password")
                 print("2. Change one of the passwords")
                 print("3. Change one of the usernames")
@@ -249,20 +252,20 @@ def main():
                 elif list_choice == "2":    # Change a specific password
                     change_pass_website = input("What is the website/app associated with the password: ")
                     change_pass_username = input("What is the username associated with the password: ")
-                    change_pass_new = input("What is the new password: ")
-                    change_password(change_pass_website, change_pass_username, change_pass_new)
+                    change_pass_new = input("What is the new password: ")                                         # change to give an option to either type a new password or use the generator
+                    change_password(pass_data, change_pass_website, change_pass_username, change_pass_new)
 
                 elif list_choice == "3":    # Change a specific username
                     change_user_website = input("What is the website/app associated with the password: ")
                     change_user_username = input("What is the username associated with the password: ")
                     change_user_new = input("What is the new username: ")
-                    change_username(change_user_website, change_user_username, change_user_new)
+                    change_username(pass_data, change_user_website, change_user_username, change_user_new)
                     
                 elif list_choice == "4":    # Change a specific website/app
                     change_web_website = input("What is the website/app associated with the password: ")
                     change_web_username = input("What is the username associated with the password: ")
                     change_web_new = input("What is the new website/app: ")
-                    change_website(change_web_website, change_web_username, change_web_new)
+                    change_website(pass_data, change_web_website, change_web_username, change_web_new)
                 
                 elif list_choice == "5":
                     print("Be aware, this option is irreversible, do you wish to continue?")
@@ -285,5 +288,6 @@ def main():
         else:   # Non-existing choice
             print("You haven't chosen one of the following options")
 
-main()
+if __name__ == "__main__":
+    main()
 
