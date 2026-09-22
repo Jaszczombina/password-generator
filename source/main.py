@@ -32,7 +32,6 @@ def generate_password():
         list_of_characters.extend(s.ascii_uppercase)
     for index in range(0, len(characters_to_exclude)):
         list_of_characters.remove(characters_to_exclude[index])
-    
     r.shuffle(list_of_characters)
     r.shuffle(list_of_characters)
     generated_password = ""
@@ -53,7 +52,7 @@ def load_password_data(filepath):
         with open(filepath, 'r') as file:
             data = json.load(file)
             return data['pass_data']
-    except (FileNotFoundError, json.JSONDecodeError):
+    except (FileNotFoundError, json.JSONDecodeError):    # If there's no file, set the data as an empty list
         return []
     
 
@@ -67,7 +66,7 @@ def show_passwords(pass_data):
         return
     print("Passwords saved: \n")
     for p in pass_data:
-        print(f"Website/app: {p['website']}, Username: {p['username']}, Password: {p['password']}")
+        print(f"- Website/app: {p['website']}, Username: {p['username']}, Password: {p['password']}")
     
 
 def remove_password(pass_data, website, username):
@@ -116,7 +115,7 @@ def main():
 
     print("Welcome to my password generator!")
     print("\nChoose which setting you would like to change or simply generate the password!") 
-    filepath = 'password_data.json'                         # might need to revisit this one
+    filepath = 'password_data.json'                   # Set the filepath for file with passwords
     pass_data = load_password_data(filepath)           # pass_data contains website, username and password values
 
     while True:
@@ -158,7 +157,7 @@ def main():
         elif choice == "3":   # Toggle special characters and exclude characters
             while True:
                 print("\nWhat would you like to change about characters?")
-                print(f"\n1. Toggle special characters on/off (current {punctuation})")
+                print(f"\n1. Toggle special characters True/False (current {punctuation})")
                 print(f"2. Add/Remove excluded character(s) (current: {characters_to_exclude})")
                 print("3. Go back to main menu")
                 punc_choice = input("\nPlease select your option: ")
@@ -192,7 +191,7 @@ def main():
                                     continue
                                 characters_to_exclude.remove(excl_rem_input[index])
                                                                                                         
-                        elif excl_choice == "3":    # Go back to menu number 3 (change (special) characters)
+                        elif excl_choice == "3":    # Go back to previous menu
                             break
                         else:    # Non-existing choice
                             print("You haven't chosen one of the following options")
@@ -218,7 +217,7 @@ def main():
                     save_password(pass_data, website, username, password)
                     break
 
-                elif save_choice == "2":     # Generate new password
+                elif save_choice == "2":     # Generate a new password
                     password = generate_password()
                     print(f"This is your generated password: {password}")
 
@@ -227,12 +226,12 @@ def main():
                 else:    # Non-existing choice
                     print("You haven't chosen one of the following options")
             
-        elif choice == "5":
+        elif choice == "5":   # Lists all the passwords
             print("\nThese are your passwords: ")
             show_passwords(pass_data)
 
         elif choice == "6":   # Modify passwords
-            if pass_data == []:
+            if pass_data == []:          #check this
                 print("Password list is empty, going back to main menu")
                 continue
             while True:
@@ -244,7 +243,7 @@ def main():
                 print("5. Remove ALL passwords")
                 print("6. Go back to main menu")
                 list_choice = input("\nPlease select your option: ")
-                if list_choice == "1":    # Remove a specific password
+                if list_choice == "1":                                   # Remove a specific password
                     rem_website = input("What is the website/app associated with the password: ")
                     rem_username = input("What is the username associated with the password: ")
                     remove_password(pass_data, rem_website, rem_username)
@@ -252,8 +251,44 @@ def main():
                 elif list_choice == "2":    # Change a specific password
                     change_pass_website = input("What is the website/app associated with the password: ")
                     change_pass_username = input("What is the username associated with the password: ")
-                    change_pass_new = input("What is the new password: ")                                         # change to give an option to either type a new password or use the generator
-                    change_password(pass_data, change_pass_website, change_pass_username, change_pass_new)
+                    for i, password in enumerate(pass_data):
+                        if password['website'] != change_pass_website or password['username'] != change_pass_username:
+                            print("\nCannot find a password with this website/app or username. Please check the list to make sure the password exists")
+                            break                                    
+                        else:
+                            while True:
+                                print("\nWhat would you like to do?")
+                                print("1. Generate a new password")
+                                print("2. I have a new password already")
+                                print("3. Go back")
+                                new_pass_choice = input("Please select your option: ")
+                                if new_pass_choice == "1":      # Generate a password to have a password for a change
+                                    new_pass_generated = generate_password()
+                                    while True:
+                                        print(f"\nThis is your new generated password: {new_pass_generated}")
+                                        print("\nWhat would you like to do?")
+                                        print("1. Change password using the one generated")
+                                        print("2. Generate a new password")
+                                        save_pass_choice = input("Please select your option: ")
+                                        if save_pass_choice == "1":      # Save the newly generated password with the values above
+                                            change_password(pass_data, change_pass_website, change_pass_username, new_pass_generated)
+                                            break
+
+                                        elif save_pass_choice == "2":      # Generate a new password
+                                            new_pass_generated = generate_password()
+                                        else:    # Non-existing choice
+                                            print("You haven't chosen one of the following options")
+                                    break   # Go back 2 menus as we changed the password already
+                            
+
+                                elif new_pass_choice == "2":       # User has a new password ready
+                                    change_pass_new = input("What is the new password: ")                                      
+                                    change_password(pass_data, change_pass_website, change_pass_username, change_pass_new)
+                                    break
+                                elif new_pass_choice == "3":    # Go back
+                                    break
+                                else:    # Non-existing choice
+                                    print("You haven't chosen one of the following options")
 
                 elif list_choice == "3":    # Change a specific username
                     change_user_website = input("What is the website/app associated with the password: ")
@@ -267,12 +302,13 @@ def main():
                     change_web_new = input("What is the new website/app: ")
                     change_website(pass_data, change_web_website, change_web_username, change_web_new)
                 
-                elif list_choice == "5":
+                elif list_choice == "5":  # Remove/Clear the list with all passwords
                     print("Be aware, this option is irreversible, do you wish to continue?")
                     rem_all_choice = input("\nPlease type yes or no: ")
 
                     if rem_all_choice.lower() == "yes":
                         remove_all_passwords(pass_data)
+                        break
                     else:
                         continue
 
@@ -281,7 +317,7 @@ def main():
                 else:    # Non-existing choice
                     print("You haven't chosen one of the following options")
              
-        elif choice == "7":  # Exit the generator
+        elif choice == "7":  # Save the data in the file and exit the generator
             save_data(filepath, pass_data)
             print("\nExiting the generator")
             break
